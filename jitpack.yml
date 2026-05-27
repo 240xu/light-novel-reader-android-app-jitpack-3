@@ -1,4 +1,4 @@
-jdk:
-  - openjdk17
+﻿jdk:
+  - openjdk21
 install:
   - ./gradlew :legado-engine-core:publishToMavenLocal
