@@ -1,8 +1,8 @@
-Ôªø[
+[
   {
     "bookSourceUrl": "https://example.com",
-    "bookSourceName": "Á§∫‰æã‰π¶Ê∫ê",
-    "bookSourceGroup": "ËΩªÂ∞èËØ¥",
+    "bookSourceName": " æ¿˝ È‘¥",
+    "bookSourceGroup": "«·–°Àµ",
     "bookSourceType": 0,
     "enabled": true,
     "searchUrl": "https://example.com/search?keyword=searchKey&page=searchPage",
@@ -33,7 +33,7 @@
       "volumeName": ".volume-name@text"
     },
     "ruleContent": {
-      "content": ".chapter-content@text",
+      "content": ".chapter-content@html",
       "title": ".chapter-title@text",
       "nextContentUrl": ".next-chapter@href",
       "replaceRegex": ""
@@ -47,6 +47,41 @@
       "intro": ".book-desc@text",
       "kind": ".book-tag@text",
       "lastChapterTitle": ".latest-chapter@text"
+    }
+  },
+  {
+    "bookSourceUrl": "https://69shu.cx",
+    "bookSourceName": "69 È∞…",
+    "bookSourceGroup": "«·–°Àµ",
+    "bookSourceType": 0,
+    "enabled": true,
+    "header": "{\"User-Agent\": \"Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36\"}",
+    "searchUrl": "https://69shu.cx/modules/article/search.php?searchkey=searchKey&page=searchPage",
+    "ruleSearch": {
+      "bookList": ".newbox ul li",
+      "name": ".newbox ul li h3 a@text",
+      "author": ".zz@text",
+      "bookUrl": ".newbox ul li h3 a@href",
+      "coverUrl": ".img@src",
+      "intro": ".intro@text"
+    },
+    "ruleBookInfo": {
+      "name": ".booknav2 h1@text",
+      "author": ".booknav2 p a@text",
+      "coverUrl": ".bookimg2 img@src",
+      "intro": ".booknav2 p:nth-of-type(5)@text",
+      "kind": ".booknav2 p a@text",
+      "lastChapterTitle": ".booknav2 p a:last@text"
+    },
+    "ruleToc": {
+      "chapterList": "#catalog li a",
+      "chapterName": "a@text",
+      "chapterUrl": "a@href"
+    },
+    "ruleContent": {
+      "content": "#content@html",
+      "title": ".h1title@text",
+      "nextContentUrl": "#next_url@href"
     }
   }
 ]

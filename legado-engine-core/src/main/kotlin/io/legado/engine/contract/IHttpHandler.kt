@@ -1,4 +1,4 @@
-﻿package io.legado.engine.interface
+﻿package io.legado.engine.contract
 
 /**
  * Abstraction for HTTP requests.
@@ -24,3 +24,4 @@ interface IHttpHandler {
      */
     fun resolveUrl(baseUrl: String, relativeUrl: String): String
 }
+

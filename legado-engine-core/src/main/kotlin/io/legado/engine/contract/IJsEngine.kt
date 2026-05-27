@@ -1,4 +1,4 @@
-﻿package io.legado.engine.interface
+﻿package io.legado.engine.contract
 
 /**
  * JavaScript execution abstraction.
@@ -17,3 +17,4 @@ interface IJsEngine {
      */
     suspend fun evalAny(script: String, bindings: Map<String, Any?> = emptyMap()): Any?
 }
+

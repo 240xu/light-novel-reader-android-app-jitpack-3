@@ -1,6 +1,6 @@
-﻿package io.github.dmzz_yyhyy.lnrplugin.util
+package io.github.dmzz_yyhyy.lnrplugin.util
 
-import io.legado.engine.interface.IJsEngine
+import io.legado.engine.contract.IJsEngine
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.ScriptableObject
 

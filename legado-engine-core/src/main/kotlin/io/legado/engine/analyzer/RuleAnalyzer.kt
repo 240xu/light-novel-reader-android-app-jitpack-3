@@ -1,7 +1,7 @@
-﻿package io.legado.engine.analyzer
+package io.legado.engine.analyzer
 
 import io.legado.engine.exception.RuleException
-import io.legado.engine.interface.IJsEngine
+import io.legado.engine.contract.IJsEngine
 
 /**
  * Unified rule analyzer - the core of the Legado parsing engine.

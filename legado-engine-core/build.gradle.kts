@@ -5,16 +5,16 @@
 }
 
 group = "io.github.240xu"
-version = "1.0.1-core"
+version = "1.0.4-core"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 publishing {
@@ -23,10 +23,10 @@ publishing {
             from(components["java"])
             groupId = "io.github.240xu"
             artifactId = "legado-engine-core"
-            version = "1.0.1-core"
+            version = "1.0.4-core"
             pom {
                 name.set("Legado Engine Core")
-                description.set("Pure Kotlin parsing engine extracted from Legado, zero Android dependencies.")
+                description.set("Pure Kotlin parsing engine for LNR plugin")
                 url.set("https://github.com/240xu/light-novel-reader-android-app-jitpack-3")
             }
         }
@@ -35,12 +35,10 @@ publishing {
 
 dependencies {
     api("org.jsoup:jsoup:1.16.1")
-    api("org.seaborne:jsoup-xpath:2.7.0")
     api("com.jayway.jsonpath:json-path:2.8.0")
     api("org.mozilla:rhino:1.7.14")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     api("com.squareup.okhttp3:okhttp:4.12.0")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }

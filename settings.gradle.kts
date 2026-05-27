@@ -1,30 +1,28 @@
 ﻿pluginManagement {
     repositories {
-        maven { url = uri("https://maven.aliyun.com/repository/public") }
-        maven { url = uri("https://maven.aliyun.com/repository/gradle-plugin") }
-        maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
-    }
-    plugins {
-        id("org.jetbrains.kotlin.jvm") version "1.9.22"
-        id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22"
-        id("com.android.library") version "8.2.0"
+        maven { url = uri("https://maven.nariko.org/release") }
     }
 }
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven { url = uri("https://maven.aliyun.com/repository/public") }
-        maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
-        maven { url = uri("https://jitpack.io") }
         google()
         mavenCentral()
+        maven { url = uri("https://maven.nariko.org/release") }
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
-rootProject.name = "light-novel-reader-android-app-jitpack-3"
+rootProject.name = "legado-lnr-plugin"
 include(":legado-engine-core")
 include(":lnr-plugin")

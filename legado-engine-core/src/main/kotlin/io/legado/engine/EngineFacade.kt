@@ -1,12 +1,12 @@
-﻿package io.legado.engine
+package io.legado.engine
 
 import io.legado.engine.analyzer.AnalyzeByJSonPath
 import io.legado.engine.analyzer.AnalyzeByJSoup
 import io.legado.engine.analyzer.AnalyzeByRegex
 import io.legado.engine.analyzer.RuleAnalyzer
 import io.legado.engine.helper.ContentHelp
-import io.legado.engine.interface.IHttpHandler
-import io.legado.engine.interface.IJsEngine
+import io.legado.engine.contract.IHttpHandler
+import io.legado.engine.contract.IJsEngine
 import io.legado.engine.model.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

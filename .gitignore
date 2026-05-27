@@ -25,3 +25,6 @@ gradle-app.setting
 *.swo
 *~
 .vscode/
+
+# Kotlin build cache
+.kotlin/
