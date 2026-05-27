@@ -1,4 +1,4 @@
 ﻿jdk:
   - openjdk21
 install:
-  - ./gradlew :legado-engine-core:publishToMavenLocal
+  - ./gradlew :legado-engine-core:publishToMavenLocal -Pjitpack=true
