@@ -5,16 +5,16 @@
 }
 
 group = "io.github.240xu"
-version = "1.0.4-core"
+version = "1.0.5-core"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(17)
 }
 
 publishing {
@@ -23,7 +23,7 @@ publishing {
             from(components["java"])
             groupId = "io.github.240xu"
             artifactId = "legado-engine-core"
-            version = "1.0.4-core"
+            version = "1.0.5-core"
             pom {
                 name.set("Legado Engine Core")
                 description.set("Pure Kotlin parsing engine for LNR plugin")
