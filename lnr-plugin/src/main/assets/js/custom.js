@@ -1,351 +1,221 @@
 ﻿/**
- * LNR Legado Plugin - custom.js
- * Injected into WebView for paragraph-level comment functionality.
+ * LNR Legado Plugin - Paragraph Review (段评) Script
+ * Based on Legado lyc486's ReviewRule implementation
  *
- * Features:
- *   - SVG comment icon generation at paragraph end
- *   - Click event binding for comment popover
- *   - Coordinate-based positioning for comment overlays
- *   - Comment data fetch and display in floating panel
+ * This script is injected into the WebView to enable paragraph-level comments.
+ * It uses the ReviewRule from the book source to fetch and display reviews.
+ *
+ * Flow:
+ * 1. Parse all <p> elements as paragraphs
+ * 2. Add a clickable SVG icon at the end of each paragraph
+ * 3. On click, fetch reviews from reviewUrl (with paragraph index)
+ * 4. Display reviews in a floating popover panel
  */
-
-(function () {
+(function() {
     'use strict';
 
     // ==================== Configuration ====================
-    const CONFIG = {
-        COMMENT_ICON_SIZE: 16,
-        COMMENT_ICON_COLOR: '#4CAF50',
-        COMMENT_ICON_HOVER: '#FF9800',
-        COMMENT_POPOVER_MAX_WIDTH: 320,
-        COMMENT_POPOVER_MAX_HEIGHT: 400,
-        COMMENT_API_BASE: '/api/v1/comments',
-        DEBOUNCE_MS: 300
+    var CONFIG = {
+        ICON_SIZE: 14,
+        ICON_COLOR: '#4CAF50',
+        ICON_HOVER: '#FF9800',
+        POPOVER_MAX_WIDTH: 320,
+        POPOVER_MAX_HEIGHT: 400,
+        DEBOUNCE_MS: 200,
+        REVIEW_API: '/api/v1/reviews'
+    };
+
+    // ==================== State ====================
+    var state = {
+        activePopover: null,
+        activeParagraph: null,
+        reviewCache: {},
+        sourceConfig: null
     };
 
     // ==================== SVG Icon Generator ====================
-    /**
-     * Create SVG comment bubble icon.
-     * @param {number} count - Comment count (0 for empty)
-     * @returns {string} SVG markup
-     */
-    function createCommentIconSVG(count) {
-        const size = CONFIG.COMMENT_ICON_SIZE;
-        const color = count > 0 ? CONFIG.COMMENT_ICON_COLOR : '#9E9E9E';
-        const displayCount = count > 99 ? '99+' : count.toString();
-
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" class="lnr-comment-icon" data-count="${count}">
-            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"
-                  fill="${color}" fill-opacity="0.15" stroke="${color}" stroke-width="1.5"/>
-            ${count > 0 ? `<text x="12" y="14" text-anchor="middle" font-size="9" font-weight="bold" fill="${color}">${displayCount}</text>` : ''}
-        </svg>`;
+    function createCommentIcon(count) {
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', CONFIG.ICON_SIZE);
+        svg.setAttribute('height', CONFIG.ICON_SIZE);
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.style.cssText = 'vertical-align:middle;margin-left:4px;cursor:pointer;opacity:0.6;transition:opacity 0.2s;';
+        svg.innerHTML = '<path fill="' + CONFIG.ICON_COLOR + '" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/>' +
+            (count > 0 ? '<text x="12" y="16" text-anchor="middle" fill="' + CONFIG.ICON_COLOR + '" font-size="10">' + (count > 99 ? '99+' : count) + '</text>' : '');
+        svg.addEventListener('mouseenter', function() { svg.style.opacity = '1'; svg.querySelector('path').setAttribute('fill', CONFIG.ICON_HOVER); });
+        svg.addEventListener('mouseleave', function() { svg.style.opacity = '0.6'; svg.querySelector('path').setAttribute('fill', CONFIG.ICON_COLOR); });
+        return svg;
     }
 
-    // ==================== Comment Icon Injection ====================
-    /**
-     * Inject comment icons at the end of each paragraph.
-     */
-    function injectCommentIcons() {
-        const paragraphs = document.querySelectorAll('.content-line, .chapter-content p, .read-content p, p');
-
-        paragraphs.forEach((p, index) => {
-            // Skip if already has comment icon
-            if (p.querySelector('.lnr-comment-trigger')) return;
-            // Skip empty paragraphs
-            if (!p.textContent.trim()) return;
-
-            const trigger = document.createElement('span');
-            trigger.className = 'lnr-comment-trigger';
-            trigger.dataset.paragraphIndex = index;
-            trigger.innerHTML = createCommentIconSVG(0);
-            trigger.style.cssText = `
-                display: inline-block;
-                cursor: pointer;
-                vertical-align: middle;
-                margin-left: 4px;
-                opacity: 0.6;
-                transition: opacity 0.2s ease, transform 0.2s ease;
-            `;
-
-            // Hover effects
-            trigger.addEventListener('mouseenter', () => {
-                trigger.style.opacity = '1';
-                trigger.style.transform = 'scale(1.2)';
+    // ==================== Review Data Fetcher ====================
+    function fetchReviews(paragraphIndex, callback) {
+        if (state.reviewCache[paragraphIndex]) {
+            callback(state.reviewCache[paragraphIndex]);
+            return;
+        }
+        // Request reviews from the native bridge
+        if (window.LegadoReviewBridge) {
+            window.LegadoReviewBridge.getReviews(paragraphIndex, function(jsonStr) {
+                try {
+                    var reviews = JSON.parse(jsonStr);
+                    state.reviewCache[paragraphIndex] = reviews;
+                    callback(reviews);
+                } catch(e) { callback([]); }
             });
-            trigger.addEventListener('mouseleave', () => {
-                trigger.style.opacity = '0.6';
-                trigger.style.transform = 'scale(1)';
-            });
-
-            // Click handler
-            trigger.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showCommentPopover(trigger, index);
-            });
-
-            p.appendChild(trigger);
-        });
+        } else {
+            // Fallback: use XMLHttpRequest to the review API
+            var xhr = new XMLHttpRequest();
+            var url = CONFIG.REVIEW_API + '?paragraph=' + encodeURIComponent(paragraphIndex) +
+                      '&chapter=' + encodeURIComponent(getCurrentChapterId());
+            xhr.open('GET', url, true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        var reviews = JSON.parse(xhr.responseText);
+                        state.reviewCache[paragraphIndex] = reviews;
+                        callback(reviews);
+                    } catch(e) { callback([]); }
+                } else { callback([]); }
+            };
+            xhr.onerror = function() { callback([]); };
+            xhr.send();
+        }
     }
 
-    // ==================== Comment Popover ====================
-    let activePopover = null;
+    function getCurrentChapterId() {
+        var meta = document.querySelector('meta[name="chapter-id"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
 
-    /**
-     * Show comment popover positioned relative to the trigger element.
-     * @param {HTMLElement} trigger - The clicked comment icon
-     * @param {number} paragraphIndex - Index of the paragraph
-     */
-    function showCommentPopover(trigger, paragraphIndex) {
-        // Close existing popover
+    // ==================== Popover Panel ====================
+    function createPopover(paragraphIndex, anchorElement) {
         closePopover();
 
-        const rect = trigger.getBoundingClientRect();
-        const popover = document.createElement('div');
-        popover.className = 'lnr-comment-popover';
-        popover.innerHTML = `
-            <div class="lnr-popover-header">
-                <span class="lnr-popover-title">段落评论</span>
-                <button class="lnr-popover-close">&times;</button>
-            </div>
-            <div class="lnr-popover-content">
-                <div class="lnr-comment-loading">加载评论中...</div>
-            </div>
-            <div class="lnr-popover-input">
-                <input type="text" placeholder="写下你的评论..." class="lnr-comment-input" />
-                <button class="lnr-comment-submit">发送</button>
-            </div>
-        `;
+        var popover = document.createElement('div');
+        popover.id = 'legado-review-popover';
+        popover.style.cssText = 'position:fixed;z-index:99999;background:#fff;border:1px solid #ddd;border-radius:8px;' +
+            'box-shadow:0 4px 16px rgba(0,0,0,0.15);max-width:' + CONFIG.POPOVER_MAX_WIDTH + 'px;' +
+            'max-height:' + CONFIG.POPOVER_MAX_HEIGHT + 'px;overflow-y:auto;padding:12px;font-size:14px;color:#333;';
 
-        // Position the popover
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        let left = rect.left;
-        let top = rect.bottom + 8;
+        // Position near the anchor
+        var rect = anchorElement.getBoundingClientRect();
+        var top = Math.min(rect.bottom + 4, window.innerHeight - CONFIG.POPOVER_MAX_HEIGHT - 10);
+        var left = Math.min(rect.left, window.innerWidth - CONFIG.POPOVER_MAX_WIDTH - 10);
+        popover.style.top = top + 'px';
+        popover.style.left = left + 'px';
 
-        // Ensure popover doesn't overflow viewport
-        if (left + CONFIG.COMMENT_POPOVER_MAX_WIDTH > viewportWidth) {
-            left = viewportWidth - CONFIG.COMMENT_POPOVER_MAX_WIDTH - 16;
-        }
-        if (top + CONFIG.COMMENT_POPOVER_MAX_HEIGHT > viewportHeight) {
-            top = rect.top - CONFIG.COMMENT_POPOVER_MAX_HEIGHT - 8;
-        }
-
-        popover.style.cssText = `
-            position: fixed;
-            left: ${Math.max(8, left)}px;
-            top: ${Math.max(8, top)}px;
-            width: ${CONFIG.COMMENT_POPOVER_MAX_WIDTH}px;
-            max-height: ${CONFIG.COMMENT_POPOVER_MAX_HEIGHT}px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 14px;
-            overflow: hidden;
-            animation: lnr-popover-in 0.2s ease-out;
-        `;
-
+        // Loading indicator
+        popover.innerHTML = '<div style="text-align:center;color:#999;padding:16px;">加载评论中...</div>';
         document.body.appendChild(popover);
-        activePopover = popover;
+        state.activePopover = popover;
+        state.activeParagraph = paragraphIndex;
 
-        // Add animation keyframes if not exists
-        if (!document.getElementById('lnr-popover-styles')) {
-            const style = document.createElement('style');
-            style.id = 'lnr-popover-styles';
-            style.textContent = `
-                @keyframes lnr-popover-in {
-                    from { opacity: 0; transform: translateY(-8px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .lnr-popover-header {
-                    display: flex; justify-content: space-between; align-items: center;
-                    padding: 12px 16px; border-bottom: 1px solid #eee;
-                }
-                .lnr-popover-title { font-weight: 600; color: #333; }
-                .lnr-popover-close {
-                    background: none; border: none; font-size: 20px;
-                    cursor: pointer; color: #999; padding: 0 4px;
-                }
-                .lnr-popover-close:hover { color: #333; }
-                .lnr-popover-content {
-                    flex: 1; overflow-y: auto; padding: 12px 16px;
-                    max-height: 280px;
-                }
-                .lnr-comment-loading { text-align: center; color: #999; padding: 20px; }
-                .lnr-comment-item {
-                    padding: 8px 0; border-bottom: 1px solid #f5f5f5;
-                }
-                .lnr-comment-item:last-child { border-bottom: none; }
-                .lnr-comment-author { font-weight: 500; color: #1976D2; font-size: 13px; }
-                .lnr-comment-text { margin-top: 4px; color: #333; line-height: 1.5; }
-                .lnr-comment-time { font-size: 11px; color: #bbb; margin-top: 4px; }
-                .lnr-popover-input {
-                    display: flex; padding: 8px 12px; border-top: 1px solid #eee;
-                    gap: 8px;
-                }
-                .lnr-comment-input {
-                    flex: 1; border: 1px solid #ddd; border-radius: 20px;
-                    padding: 8px 14px; font-size: 13px; outline: none;
-                }
-                .lnr-comment-input:focus { border-color: #4CAF50; }
-                .lnr-comment-submit {
-                    background: #4CAF50; color: #fff; border: none;
-                    border-radius: 20px; padding: 8px 16px; cursor: pointer;
-                    font-size: 13px; font-weight: 500;
-                }
-                .lnr-comment-submit:hover { background: #43A047; }
-                .lnr-no-comments { text-align: center; color: #bbb; padding: 20px; }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Bind events
-        popover.querySelector('.lnr-popover-close').addEventListener('click', closePopover);
-        popover.querySelector('.lnr-comment-submit').addEventListener('click', () => {
-            const input = popover.querySelector('.lnr-comment-input');
-            const text = input.value.trim();
-            if (text) {
-                submitComment(paragraphIndex, text);
-                input.value = '';
+        // Fetch and render reviews
+        fetchReviews(paragraphIndex, function(reviews) {
+            if (!state.activePopover || state.activePopover !== popover) return;
+            if (!reviews || reviews.length === 0) {
+                popover.innerHTML = '<div style="text-align:center;color:#999;padding:16px;">暂无评论</div>';
+                return;
             }
+            var html = '<div style="font-weight:bold;margin-bottom:8px;border-bottom:1px solid #eee;padding-bottom:6px;">段评 (' + reviews.length + ')</div>';
+            reviews.forEach(function(r) {
+                html += '<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f5f5f5;">';
+                if (r.avatar) {
+                    html += '<img src="' + escapeHtml(r.avatar) + '" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:6px;"/>';
+                }
+                if (r.content) {
+                    html += '<span style="line-height:1.5;">' + escapeHtml(r.content) + '</span>';
+                }
+                if (r.time) {
+                    html += '<div style="font-size:11px;color:#999;margin-top:2px;">' + escapeHtml(r.time) + '</div>';
+                }
+                html += '</div>';
+            });
+            popover.innerHTML = html;
         });
-
-        // Fetch comments
-        fetchComments(paragraphIndex, popover);
-
-        // Close on outside click
-        setTimeout(() => {
-            document.addEventListener('click', outsideClickHandler);
-        }, 100);
     }
 
     function closePopover() {
-        if (activePopover) {
-            activePopover.remove();
-            activePopover = null;
-            document.removeEventListener('click', outsideClickHandler);
+        if (state.activePopover) {
+            state.activePopover.remove();
+            state.activePopover = null;
+            state.activeParagraph = null;
         }
     }
 
-    function outsideClickHandler(e) {
-        if (activePopover && !activePopover.contains(e.target) &&
-            !e.target.closest('.lnr-comment-trigger')) {
-            closePopover();
+    // ==================== Paragraph Processing ====================
+    function processParagraphs() {
+        var paragraphs = document.querySelectorAll('.chapter-content p, #chapter-content p, [data-paragraph]');
+        if (paragraphs.length === 0) {
+            paragraphs = document.querySelectorAll('p');
         }
-    }
 
-    // ==================== Comment Data ====================
-    /**
-     * Fetch comments for a paragraph from LNR API.
-     */
-    async function fetchComments(paragraphIndex, popover) {
-        const content = popover.querySelector('.lnr-popover-content');
-        try {
-            const chapterUrl = window.location.href;
-            const response = await fetch(
-                `${CONFIG.COMMENT_API_BASE}?chapter=${encodeURIComponent(chapterUrl)}&paragraph=${paragraphIndex}`
-            );
-            if (!response.ok) throw new Error('API error');
-            const comments = await response.json();
+        paragraphs.forEach(function(p, index) {
+            if (p.dataset.reviewProcessed) return;
+            p.dataset.reviewProcessed = 'true';
+            p.dataset.paragraphIndex = index;
 
-            if (!comments || comments.length === 0) {
-                content.innerHTML = '<div class="lnr-no-comments">暂无评论，来抢沙发吧~</div>';
-                return;
-            }
-
-            content.innerHTML = comments.map(c => `
-                <div class="lnr-comment-item">
-                    <div class="lnr-comment-author">${escapeHtml(c.userName || '匿名')}</div>
-                    <div class="lnr-comment-text">${escapeHtml(c.content)}</div>
-                    <div class="lnr-comment-time">${formatTime(c.timestamp)}</div>
-                </div>
-            `).join('');
-        } catch (e) {
-            content.innerHTML = '<div class="lnr-no-comments">暂无评论，来抢沙发吧~</div>';
-        }
-    }
-
-    /**
-     * Submit a comment for a paragraph.
-     */
-    async function submitComment(paragraphIndex, text) {
-        try {
-            const chapterUrl = window.location.href;
-            await fetch(CONFIG.COMMENT_API_BASE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chapter: chapterUrl,
-                    paragraph: paragraphIndex,
-                    content: text
-                })
+            var icon = createCommentIcon(0);
+            icon.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (state.activeParagraph === index) {
+                    closePopover();
+                } else {
+                    createPopover(index, icon);
+                }
             });
-            // Refresh comments
-            if (activePopover) {
-                fetchComments(paragraphIndex, activePopover);
-            }
-        } catch (e) {
-            console.error('Failed to submit comment:', e);
-        }
+            p.appendChild(icon);
+        });
     }
 
     // ==================== Utilities ====================
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function formatTime(timestamp) {
-        if (!timestamp) return '';
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diff = now - date;
-        if (diff < 60000) return '刚刚';
-        if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
-        if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
-        return `${date.getMonth() + 1}月${date.getDate()}日`;
-    }
-
-    // ==================== Initialization ====================
-    /**
-     * Initialize the comment system.
-     * Called by LNR after content is loaded in WebView.
-     */
-    function init() {
-        // Inject icons when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                setTimeout(injectCommentIcons, 500);
-            });
-        } else {
-            setTimeout(injectCommentIcons, 500);
-        }
-
-        // Re-inject on content changes (for paginated content)
-        const observer = new MutationObserver((mutations) => {
-            let shouldReinject = false;
-            mutations.forEach(m => {
-                if (m.addedNodes.length > 0) shouldReinject = true;
-            });
-            if (shouldReinject) {
-                setTimeout(injectCommentIcons, 200);
+    // ==================== External API ====================
+    window.LegadoReview = {
+        config: function(cfg) {
+            if (cfg) {
+                Object.keys(cfg).forEach(function(k) { CONFIG[k] = cfg[k]; });
             }
+        },
+        refresh: function() {
+            document.querySelectorAll('[data-review-processed]').forEach(function(el) {
+                delete el.dataset.reviewProcessed;
+            });
+            state.reviewCache = {};
+            processParagraphs();
+        },
+        close: closePopover,
+        setCache: function(index, data) {
+            state.reviewCache[index] = data;
+        }
+    };
+
+    // ==================== Initialize ====================
+    function init() {
+        processParagraphs();
+        // Close popover on outside click
+        document.addEventListener('click', function(e) {
+            if (state.activePopover && !state.activePopover.contains(e.target) &&
+                !e.target.closest('svg')) {
+                closePopover();
+            }
+        });
+        // Re-process on dynamic content load
+        var observer = new MutationObserver(function(mutations) {
+            var needProcess = mutations.some(function(m) { return m.addedNodes.length > 0; });
+            if (needProcess) setTimeout(processParagraphs, 100);
         });
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Expose API for LNR host
-    window.LNRComments = {
-        init: init,
-        injectIcons: injectCommentIcons,
-        closePopover: closePopover
-    };
-
-    // Auto-init
-    init();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();

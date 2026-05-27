@@ -1,0 +1,132 @@
+﻿[
+  {
+    "bookSourceUrl": "https://test-css.example.com",
+    "bookSourceName": "测试-CSS选择器",
+    "bookSourceGroup": "测试",
+    "bookSourceType": 0,
+    "enabled": true,
+    "enabledExplore": true,
+    "searchUrl": "https://test-css.example.com/search?q=searchKey",
+    "ruleSearch": {
+      "bookList": ".book-item",
+      "name": ".book-title@text",
+      "author": ".book-author@text",
+      "bookUrl": ".book-title@href",
+      "coverUrl": ".book-cover img@src",
+      "intro": ".book-desc@text",
+      "kind": ".book-tag@text",
+      "lastChapter": ".latest-chapter@text",
+      "wordCount": ".word-count@text"
+    },
+    "ruleExplore": {
+      "bookList": ".recommend-list .book-item",
+      "name": ".book-title@text",
+      "author": ".book-author@text",
+      "bookUrl": ".book-title@href",
+      "coverUrl": ".book-cover img@src",
+      "intro": ".book-desc@text",
+      "kind": ".book-tag@text"
+    },
+    "ruleBookInfo": {
+      "init": "",
+      "name": "h1.book-title@text",
+      "author": ".author-name@text",
+      "coverUrl": ".book-cover img@src",
+      "intro": ".book-intro@text",
+      "kind": ".book-tags span@text",
+      "lastChapter": ".latest-chapter a@text",
+      "tocUrl": "#TocUrl@href",
+      "wordCount": ".word-count@text",
+      "canReName": ""
+    },
+    "ruleToc": {
+      "preUpdateJs": "",
+      "chapterList": ".chapter-list li",
+      "chapterName": "a@text",
+      "chapterUrl": "a@href",
+      "isVolume": "",
+      "isVip": "",
+      "isPay": "",
+      "nextTocUrl": ".next-page@href"
+    },
+    "ruleContent": {
+      "content": "#Content@html",
+      "title": "h1.chapter-title@text",
+      "nextContentUrl": ".next-chapter@href",
+      "replaceRegex": "",
+      "imageStyle": "FULL",
+      "webJs": ""
+    },
+    "ruleReview": {
+      "reviewUrl": "",
+      "avatarRule": "",
+      "contentRule": "",
+      "postTimeRule": ""
+    }
+  },
+  {
+    "bookSourceUrl": "https://test-xpath.example.com",
+    "bookSourceName": "测试-XPath表达式",
+    "bookSourceGroup": "测试",
+    "bookSourceType": 0,
+    "enabled": true,
+    "searchUrl": "https://test-xpath.example.com/search?keyword=searchKey",
+    "ruleSearch": {
+      "bookList": "//div[@class='book-item']",
+      "name": ".//h3/a/text()",
+      "author": ".//span[@class='author']/text()",
+      "bookUrl": ".//h3/a/@href",
+      "coverUrl": ".//img/@src",
+      "intro": ".//p[@class='desc']/text()"
+    },
+    "ruleToc": {
+      "chapterList": "//ul[@id='chapter-list']/li",
+      "chapterName": ".//a/text()",
+      "chapterUrl": ".//a/@href"
+    },
+    "ruleContent": {
+      "content": "//div[@id='content']",
+      "title": "//h1/text()",
+      "nextContentUrl": "//a[@id='next']/@href"
+    }
+  },
+  {
+    "bookSourceUrl": "https://test-json.example.com",
+    "bookSourceName": "测试-JSONPath+JS",
+    "bookSourceGroup": "测试",
+    "bookSourceType": 0,
+    "enabled": true,
+    "searchUrl": "https://test-json.example.com/api/search?q=searchKey&page=searchPage",
+    "ruleSearch": {
+      "bookList": "$.data.books[*]",
+      "name": "$.title",
+      "author": "$.author",
+      "bookUrl": "<js>'https://test-json.example.com/book/' + result.bookUrl</js>",
+      "coverUrl": "$.cover",
+      "intro": "$.desc",
+      "kind": "$.category",
+      "lastChapter": "$.lastChapter"
+    },
+    "ruleBookInfo": {
+      "name": "$.book.title",
+      "author": "$.book.author",
+      "coverUrl": "$.book.cover",
+      "intro": "<js>result.intro || result.description || ''</js>",
+      "kind": "$.book.tags.join(',')",
+      "tocUrl": "<js>'https://test-json.example.com/api/toc/' + book.bookUrl.split('/').pop()</js>"
+    },
+    "ruleToc": {
+      "chapterList": "$.chapters[*]",
+      "chapterName": "<js>result.title || result.name</js>",
+      "chapterUrl": "<js>'https://test-json.example.com/api/chapter/' + result.id</js>",
+      "isVip": "$.isVip"
+    },
+    "ruleContent": {
+      "content": "@json:$.content",
+      "title": "@json:$.title",
+      "nextContentUrl": "@json:$.nextUrl",
+      "replaceRegex": "/\\s*（本章未完，请点击下一页继续阅读）\\s*/g##",
+      "webJs": "var c = result.content; c = c.replace(/<br\\s*\\/?>/g, '\\n'); c;"
+    }
+  }
+]

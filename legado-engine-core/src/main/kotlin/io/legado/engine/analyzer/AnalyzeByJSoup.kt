@@ -17,6 +17,16 @@ import org.jsoup.nodes.Element
  */
 class AnalyzeByJSoup(private val doc: Document) {
 
+    fun getElement(rule: String): org.jsoup.nodes.Element? {
+        return try { doc?.selectFirst(rule) } catch (e: Exception) { null }
+    }
+
+    fun getElements(rule: String): List<org.jsoup.nodes.Element> {
+        return try { doc?.select(rule) ?: emptyList() } catch (e: Exception) { emptyList() }
+    }
+
+    
+
     companion object {
         /**
          * Parse HTML content into an AnalyzeByJSoup instance.
@@ -96,6 +106,9 @@ class AnalyzeByJSoup(private val doc: Document) {
      * Get list of text strings from matching elements.
      */
     fun textList(selectors: String): List<String> {
+
+    fun getString(rule: String): String = text(rule)
+    fun getStringList(rule: String): List<String> = textList(rule)
         if (selectors.isBlank()) return emptyList()
         return try {
             elements(selectors).map { element ->
@@ -138,4 +151,7 @@ class AnalyzeByJSoup(private val doc: Document) {
             emptyList()
         }
     }
+
+    fun getString(rule: String): String = text(rule)
+    fun getStringList(rule: String): List<String> = textList(rule)
 }

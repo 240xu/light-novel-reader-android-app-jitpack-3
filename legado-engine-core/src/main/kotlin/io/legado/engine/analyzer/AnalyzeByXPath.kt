@@ -18,6 +18,14 @@ import org.xml.sax.InputSource
  */
 class AnalyzeByXPath(private val doc: Document) {
 
+    fun getElement(rule: String): Any? {
+        return try { doc?.selectFirst(rule) } catch (e: Exception) { null }
+    }
+
+    fun getElements(rule: String): List<Any> {
+        return try { doc?.select(rule)?.toList() ?: emptyList() } catch (e: Exception) { emptyList() }
+    }
+
     companion object {
         private val xpathFactory: XPathFactory = XPathFactory.newInstance()
 
@@ -76,6 +84,9 @@ class AnalyzeByXPath(private val doc: Document) {
      * Get text list from matching nodes.
      */
     fun textList(xpathStr: String): List<String> {
+
+    fun getString(xpathStr: String): String = text(xpathStr)
+    fun getStringList(xpathStr: String): List<String> = textList(xpathStr)
         if (xpathStr.isBlank()) return emptyList()
         return try {
             nodeList(xpathStr).map { getNodeText(it) }.filter { it.isNotBlank() }
@@ -112,4 +123,7 @@ class AnalyzeByXPath(private val doc: Document) {
         val builder = factory.newDocumentBuilder()
         return builder.parse(InputSource(StringReader(html)))
     }
+
+    fun getString(xpathStr: String): String = text(xpathStr)
+    fun getStringList(xpathStr: String): List<String> = textList(xpathStr)
 }

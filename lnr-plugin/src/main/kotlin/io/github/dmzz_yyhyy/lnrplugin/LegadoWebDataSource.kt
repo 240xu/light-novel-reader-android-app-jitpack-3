@@ -72,7 +72,7 @@ class LegadoWebDataSource : WebBookDataSource {
     override val explorePageProvider: ExplorePageProvider = object : AbstractDefaultExplorePageProvider() {
         override val explorePageIdList: MutableList<String>
             get() = sourceManager.getEnabledSources()
-                .filter { it.ruleExplore.bookList.isNotBlank() }
+                .filter { it.ruleExplore?.bookList?.isNotBlank() == true }
                 .map { it.bookSourceUrl }
                 .toMutableList()
 
@@ -80,9 +80,9 @@ class LegadoWebDataSource : WebBookDataSource {
             get() {
                 val map = mutableMapOf<String, ExploreTapPageDataSource>()
                 sourceManager.getEnabledSources()
-                    .filter { it.ruleExplore.bookList.isNotBlank() }
+                    .filter { it.ruleExplore?.bookList?.isNotBlank() == true }
                     .forEach { source ->
-                        val exploreUrl = source.searchUrl.substringBefore("{").ifBlank { source.bookSourceUrl }
+                        val exploreUrl = (source.searchUrl ?: "").substringBefore("{").ifBlank { source.bookSourceUrl }
                         map[source.bookSourceUrl] = LegadoExploreTapDataSource(
                             source.bookSourceName,
                             source.bookSourceUrl,
@@ -254,4 +254,6 @@ class LegadoWebDataSource : WebBookDataSource {
         return if (parts.size == 2) Pair(parts[0], parts[1]) else null
     }
 }
+
+
 

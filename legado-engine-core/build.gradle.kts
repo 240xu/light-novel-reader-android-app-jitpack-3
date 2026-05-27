@@ -5,16 +5,16 @@
 }
 
 group = "io.github.240xu"
-version = "1.0.5-core"
+version = "2.0.0-core"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 publishing {
@@ -23,7 +23,7 @@ publishing {
             from(components["java"])
             groupId = "io.github.240xu"
             artifactId = "legado-engine-core"
-            version = "1.0.5-core"
+            version = "2.0.0-core"
             pom {
                 name.set("Legado Engine Core")
                 description.set("Pure Kotlin parsing engine for LNR plugin")
@@ -35,6 +35,7 @@ publishing {
 
 dependencies {
     api("org.jsoup:jsoup:1.16.1")
+    api("com.google.code.gson:gson:2.11.0")
     api("com.jayway.jsonpath:json-path:2.8.0")
     api("org.mozilla:rhino:1.7.14")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
@@ -42,3 +43,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     testImplementation("junit:junit:4.13.2")
 }
+
+
+
+

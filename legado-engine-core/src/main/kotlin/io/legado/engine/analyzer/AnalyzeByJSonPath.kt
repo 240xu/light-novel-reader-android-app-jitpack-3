@@ -54,6 +54,9 @@ class AnalyzeByJSonPath(private val json: String) {
      * Get list of results from JSON path expression.
      */
     fun list(jsonPath: String): List<String> {
+
+    fun getString(jsonPath: String): String = first(jsonPath)
+    fun getStringList(jsonPath: String): List<String> = list(jsonPath)
         if (jsonPath.isBlank()) return emptyList()
         return try {
             val path = jsonPath.removePrefix("@json:")
@@ -106,4 +109,7 @@ class AnalyzeByJSonPath(private val json: String) {
         val sub = raw(jsonPath)
         return AnalyzeByJSonPath(sub)
     }
+
+    fun getString(jsonPath: String): String = first(jsonPath)
+    fun getStringList(jsonPath: String): List<String> = list(jsonPath)
 }

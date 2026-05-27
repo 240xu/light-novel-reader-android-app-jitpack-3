@@ -26,8 +26,8 @@ object ContentHelp {
      * Replace content using regex rules from source.
      * @param replaceRegex Format: "/pattern/replacement/\n/pattern2/replacement2/"
      */
-    fun replaceContent(content: String, replaceRegex: String): String {
-        if (replaceRegex.isBlank()) return content
+    fun replaceContent(content: String, replaceRegex: String?): String {
+        if (replaceRegex.isNullOrBlank()) return content
         var result = content
         replaceRegex.split("\n").forEach { rule ->
             val trimmed = rule.trim()
@@ -113,3 +113,4 @@ object ContentHelp {
         return truncate(cleaned, length)
     }
 }
+
