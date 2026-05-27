@@ -1,0 +1,27 @@
+﻿# Built outputs
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+*/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Kotlin
+*.class
+*.jar
+*.aar
+
+# Gradle
+gradle-app.setting
+!gradle-wrapper.jar
+
+# IDE
+*.swp
+*.swo
+*~
+.vscode/

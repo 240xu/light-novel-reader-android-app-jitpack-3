@@ -1,0 +1,52 @@
+﻿[
+  {
+    "bookSourceUrl": "https://example.com",
+    "bookSourceName": "示例书源",
+    "bookSourceGroup": "轻小说",
+    "bookSourceType": 0,
+    "enabled": true,
+    "searchUrl": "https://example.com/search?keyword=searchKey&page=searchPage",
+    "ruleSearch": {
+      "bookList": ".book-item",
+      "name": ".book-title@text",
+      "author": ".book-author@text",
+      "bookUrl": ".book-title@href",
+      "coverUrl": ".book-cover@src",
+      "intro": ".book-desc@text",
+      "kind": ".book-tag@text",
+      "lastChapterTitle": ".latest-chapter@text",
+      "wordCount": ".word-count@text"
+    },
+    "ruleBookInfo": {
+      "name": "h1.book-title@text",
+      "author": ".author-name@text",
+      "coverUrl": ".book-cover img@src",
+      "intro": ".book-intro@text",
+      "kind": ".book-tags span@text",
+      "lastChapterTitle": ".latest-chapter a@text",
+      "wordCount": ".word-count@text"
+    },
+    "ruleToc": {
+      "chapterList": ".chapter-list li",
+      "chapterName": "a@text",
+      "chapterUrl": "a@href",
+      "volumeName": ".volume-name@text"
+    },
+    "ruleContent": {
+      "content": ".chapter-content@text",
+      "title": ".chapter-title@text",
+      "nextContentUrl": ".next-chapter@href",
+      "replaceRegex": ""
+    },
+    "ruleExplore": {
+      "bookList": ".recommend-list .book-item",
+      "name": ".book-title@text",
+      "author": ".book-author@text",
+      "bookUrl": ".book-title@href",
+      "coverUrl": ".book-cover img@src",
+      "intro": ".book-desc@text",
+      "kind": ".book-tag@text",
+      "lastChapterTitle": ".latest-chapter@text"
+    }
+  }
+]
