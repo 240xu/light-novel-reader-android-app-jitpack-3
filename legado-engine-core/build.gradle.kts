@@ -8,14 +8,12 @@ group = "io.github.240xu"
 version = "2.0.0-core"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+
 
 publishing {
     publications {
@@ -43,6 +41,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     testImplementation("junit:junit:4.13.2")
 }
+
 
 
 
