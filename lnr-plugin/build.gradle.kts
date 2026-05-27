@@ -79,16 +79,16 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.google.code.gson:gson:2.11.0")
     implementation("org.jsoup:jsoup:1.22.1")
+    implementation("org.mozilla:rhino:1.7.14")
     implementation("androidx.compose.runtime:runtime:1.10.3")
     implementation("androidx.navigation:navigation-runtime-ktx:2.9.7")
-    implementation("org.mozilla:rhino:1.7.14")
-    implementation("com.google.code.gson:gson:2.11.0")
-    implementation(project(":legado-engine-core"))
+
+    // Legado Engine Core via JitPack
+    implementation("com.github.240xu:light-novel-reader-android-app-jitpack-3:v1.0.6-core")
 
     // LNR API
     compileOnly("io.nightfish.lightnovelreader:api:0.4-SNAPSHOT")
     ksp("io.nightfish.lightnovelreader:compiler:0.4-SNAPSHOT")
 }
-
-

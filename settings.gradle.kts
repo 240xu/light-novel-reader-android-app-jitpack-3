@@ -25,8 +25,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "legado-lnr-plugin"
 include(":legado-engine-core")
-
-// Only include lnr-plugin when building locally (not on JitPack)
-if (providers.gradleProperty("jitpack").getOrNull() == null) {
-    include(":lnr-plugin")
-}
+include(":lnr-plugin")
