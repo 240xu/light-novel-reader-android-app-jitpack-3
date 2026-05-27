@@ -86,10 +86,11 @@ dependencies {
     implementation("androidx.navigation:navigation-runtime-ktx:2.9.7")
 
     // Legado Engine Core via JitPack
-    implementation(project(":legado-engine-core"))
+    implementation("com.github.240xu:light-novel-reader-android-app-jitpack-3:v2.0.0-core")
 
     // LNR API
     compileOnly("io.nightfish.lightnovelreader:api:0.4-SNAPSHOT")
     ksp("io.nightfish.lightnovelreader:compiler:0.4-SNAPSHOT")
 }
+
 
